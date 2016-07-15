@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=PayCon
+Comment=PayCon
+Exec=/usr/bin/PayCon-qt %u
+Terminal=false
+Type=Application
+Icon=PayCon
+MimeType=x-scheme-handler/paycon;
+Categories=Office;
