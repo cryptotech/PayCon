@@ -16,7 +16,7 @@
 	$main-color-xl = #777770
 	$main-color-d = #ffffff
 	$main-color-xd = #0C090A
-      $main-color-transparent-0 = rgba(0,0,0,50)
+    $main-color-transparent-0 = rgba(0,0,0,50)
 	$main-color-transparent-1 = rgba(0,0,0,50)
 	$main-color-transparent-2 = rgba(0,0,0,50)
 	$main-color-transparent-3 = rgba(119,119,112,50)     
@@ -63,7 +63,7 @@ QFrame {
 }
 /* Coin Image */
 #label_2 {
-	qproperty-pixmap: url($themes-dir/Night/paycon-gs3.png);
+	qproperty-pixmap: url($themes-dir/Night/PayCon-gs3.png);
 }
 
 
