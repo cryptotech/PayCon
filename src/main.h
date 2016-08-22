@@ -12,7 +12,7 @@
 #include "script.h"
 #include "scrypt.h"
 #include "hashblock.h"
-#include "base58.h"
+
 
 #include <list>
 
@@ -30,7 +30,6 @@ class CNode;
 
 static const int LAST_POW_BLOCK = 60480;
 static const int DIFF_SWITCH_BLOCK = 50000;
-static const int FEE_HARDFORK_BLOCK = 800000;
 
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
@@ -57,16 +56,6 @@ static const int64_t DEF_COMBINE_AMOUNT = 100 * COIN;
 /** Combine Threshold Max */  
 static const int64_t MAX_COMBINE_AMOUNT = 1000 * COIN;
 
-/* The foundation address */
-#define FOUNDATION_ADDRESS "PQ1EaFtr5yG3yHRcqNGro3NeL3WX5V9gG7"
-#define FOUNDATION_AMOUNT 1
-
-inline CScript GetFoundationScript() {
-   CBitcoinAddress additionalOut(FOUNDATION_ADDRESS);
-   CScript addScript;
-   addScript.SetDestination(additionalOut.Get());
-   return addScript;
-}
 
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;

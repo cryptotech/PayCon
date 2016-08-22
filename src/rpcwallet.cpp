@@ -455,45 +455,28 @@ Value sendtoaddress(const Array& params, bool fHelp)
             "<amount> is a real and is rounded to the nearest 0.000001"
             + HelpRequiringPassphrase());
 
-    CWalletTx wtx;
     CBitcoinAddress address(params[0].get_str());
-    int64_t nAmount = AmountFromValue(params[1]);
-    vector<pair<CScript, int64_t> > vecSend;
-
-    // Foundation Payments
-    vecSend.push_back(make_pair(GetFoundationScript(), FOUNDATION_AMOUNT * COIN));
-
     if (!address.IsValid())
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid SaluS address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid PayCon address");
 
-    // Payment to address
-    CScript scriptPubKey;
-    scriptPubKey.SetDestination(address.Get());
-    vecSend.push_back(make_pair(scriptPubKey, nAmount));
+    // Amount
+    int64_t nAmount = AmountFromValue(params[1]);
 
     // Wallet comments
+    CWalletTx wtx;
     if (params.size() > 2 && params[2].type() != null_type && !params[2].get_str().empty())
         wtx.mapValue["comment"] = params[2].get_str();
     if (params.size() > 3 && params[3].type() != null_type && !params[3].get_str().empty())
         wtx.mapValue["to"]      = params[3].get_str();
 
-    EnsureWalletIsUnlocked();
+    if (pwalletMain->IsLocked())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
-    // Send
-    CReserveKey keyChange(pwalletMain);
-    int64_t nFeeRequired = 0;
-    bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired,1);
-    if (!fCreated)
-    {
-        if (nAmount + nFeeRequired + FOUNDATION_AMOUNT > pwalletMain->GetBalance())
-            throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
-        throw JSONRPCError(RPC_WALLET_ERROR, "Transaction creation failed");
-    }
-    if (!pwalletMain->CommitTransaction(wtx, keyChange))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Transaction commit failed");
+    string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx, false, false);
+    if (strError != "")
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
 
     return wtx.GetHash().GetHex();
-
 }
 
 Value listaddressgroupings(const Array& params, bool fHelp)
@@ -837,17 +820,7 @@ Value sendfrom(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid PayCon address");
     int64_t nAmount = AmountFromValue(params[2]);
 
-    vector<pair<CScript, int64_t> > vecSend;
     int nMinDepth = 1;
-
-    // Foundation Payments
-    vecSend.push_back(make_pair(GetFoundationScript(), FOUNDATION_AMOUNT * COIN));
-
-    // Payment to address
-    CScript scriptPubKey;
-    scriptPubKey.SetDestination(address.Get());
-    vecSend.push_back(make_pair(scriptPubKey, nAmount));
-
     if (params.size() > 3)
         nMinDepth = params[3].get_int();
 
@@ -860,29 +833,17 @@ Value sendfrom(const Array& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    scriptPubKey.SetDestination(address.Get());
-    vecSend.push_back(make_pair(scriptPubKey, nAmount));
-
     // Check funds
     int64_t nBalance = GetAccountBalance(strAccount, nMinDepth);
     if (nAmount > nBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
 
     // Send
-    CReserveKey keyChange(pwalletMain);
-    int64_t nFeeRequired = 0;
-    bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired,1);
-    if (!fCreated)
-    {
-        if (nAmount + nFeeRequired + FOUNDATION_AMOUNT > pwalletMain->GetBalance())
-            throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
-        throw JSONRPCError(RPC_WALLET_ERROR, "Transaction creation failed");
-    }
-    if (!pwalletMain->CommitTransaction(wtx, keyChange))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Transaction commit failed");
+    string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx, false, false);
+    if (strError != "")
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
 
     return wtx.GetHash().GetHex();
-
 }
 
 
@@ -941,7 +902,7 @@ Value sendmany(const Array& params, bool fHelp)
     bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, 1);
     if (!fCreated)
     {
-        if (totalAmount + nFeeRequired + FOUNDATION_AMOUNT > pwalletMain->GetBalance())
+        if (totalAmount + nFeeRequired > pwalletMain->GetBalance())
             throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
         throw JSONRPCError(RPC_WALLET_ERROR, "Transaction creation failed");
     }
@@ -2699,4 +2660,3 @@ Value hashsettings(const Array& params, bool fHelp)
 	}
 	return false;
 } 
-

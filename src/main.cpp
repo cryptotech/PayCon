@@ -473,8 +473,6 @@ bool CTransaction::CheckTransaction() const
     if (::GetSerializeSize(*this, SER_NETWORK, PROTOCOL_VERSION) > MAX_BLOCK_SIZE)
         return DoS(100, error("CTransaction::CheckTransaction() : size limits failed"));
 
-    bool payFoundation = false;
-
     // Check for negative or overflow output values
     int64_t nValueOut = 0;
     for (unsigned int i = 0; i < vout.size(); i++)
@@ -489,14 +487,6 @@ bool CTransaction::CheckTransaction() const
         nValueOut += txout.nValue;
         if (!MoneyRange(nValueOut))
             return DoS(100, error("CTransaction::CheckTransaction() : txout total out of range"));
-
-       if (vout[i].scriptPubKey == GetFoundationScript() && vout[i].nValue >= FOUNDATION_AMOUNT * COIN) {
-          payFoundation = true;
-        }
-    }
-
-    if (!IsCoinBase() && !IsCoinStake() && !payFoundation && pindexBest->nHeight+1 > FEE_HARDFORK_BLOCK) {
-        return DoS(10, error("CTransaction::CheckTransaction() : The foundation was not paid during this transaction."));
     }
 
     // Check for duplicate inputs

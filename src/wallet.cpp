@@ -2335,7 +2335,6 @@ string CWallet::SendMoney(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNe
     }
     if (!CreateTransaction(scriptPubKey, nValue, wtxNew, reservekey, nFeeRequired))
     {
-        nFeeRequired += FOUNDATION_AMOUNT;
         string strError;
         if (nValue + nFeeRequired > GetBalance())
             strError = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds  "), FormatMoney(nFeeRequired).c_str());
@@ -2361,8 +2360,7 @@ string CWallet::SendMoneyToDestination(const CTxDestination& address, int64_t nV
     // Check amount
     if (nValue <= 0)
         return _("Invalid amount");
-
-    if (nValue + nTransactionFee + FOUNDATION_AMOUNT > GetBalance())
+    if (nValue + nTransactionFee > GetBalance())
         return _("Insufficient funds");
 
     // Parse Bitcoin address

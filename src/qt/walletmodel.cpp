@@ -132,7 +132,6 @@ bool WalletModel::validateAddress(const QString &address)
 WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipient> &recipients, int nSplitBlock, const CCoinControl *coinControl)
 {
     qint64 total = 0;
-    total += (FOUNDATION_AMOUNT * COIN);
     QSet<QString> setAddress;
     QString hex;
 
@@ -184,7 +183,6 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipie
 
         // Sendmany
         std::vector<std::pair<CScript, int64_t> > vecSend;
-        vecSend.push_back(make_pair(GetFoundationScript(), FOUNDATION_AMOUNT * COIN));
         foreach(const SendCoinsRecipient &rcp, recipients)
         {
             CScript scriptPubKey;
